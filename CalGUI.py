@@ -3,8 +3,13 @@ import wx
 
 def click_btn(event):
     # CalText[1].SetValue(CalText[0].GetValue())
-    NumRegster(CalText[0].GetValue())
+    # MulDiv(CalText[0].GetValue())
+    answer = PlusMinus(CalText[0].GetValue())
+    print("答え", answer)
+    CalText[1].SetValue(str(answer))
+    print("入力値記録", Regsterlist)
     print("数値演算子記録", NumEnzanlist)
+    print("掛け算割り算", MulDivlist)
 
 
 def Regster(str):
@@ -23,7 +28,7 @@ def NumRegster(str):
             num = ""
             j = i
             while j < len(Regsterlist):
-                if '0' <= Regsterlist[j] <= '9':
+                if '0' <= Regsterlist[j] <= '9' or Regsterlist[j] == ".":
                     num = num + Regsterlist[j]
                 elif Regsterlist[j] == " ":
                     i = j - 1
@@ -34,6 +39,57 @@ def NumRegster(str):
             NumEnzanlist.append(Regsterlist[i])
 
         i = i + 2
+
+
+def MulDiv(str):
+    NumRegster(str)
+    result = 1.0
+    i = 0
+    # False:掛け算と割り算が1回以上行われたTrue:掛け算と割り算が1回も行われてない
+    loop = True
+    while i < len(NumEnzanlist):
+        if NumEnzanlist[i] == "*":
+            if loop:
+                result = float(NumEnzanlist[i - 1])
+            result = result * float(NumEnzanlist[i + 1])
+            loop = False
+        elif NumEnzanlist[i] == "/":
+            if loop:
+                result = float(NumEnzanlist[i - 1])
+            result = result / float(NumEnzanlist[i + 1])
+            loop = False
+        elif NumEnzanlist[i] == "+" or NumEnzanlist[i] == "-" or NumEnzanlist[i] == "=":
+            if loop:
+                result = float(NumEnzanlist[i - 1])
+            MulDivlist.append(result)
+            MulDivlist.append(NumEnzanlist[i])
+            loop = True
+        i = i + 1
+# 5 - 2 * 3 / 4 + 2 =
+
+
+def PlusMinus(str):
+    MulDiv(str)
+    i = 0
+    result = 0.0
+    loop = True
+    while i < len(MulDivlist):
+        if MulDivlist[i] == "+":
+            if loop:
+                result = MulDivlist[i - 1]
+            result = result + MulDivlist[i + 1]
+            loop = False
+        elif MulDivlist[i] == "-":
+            if loop:
+                result = MulDivlist[i - 1]
+            result = result - MulDivlist[i + 1]
+            loop = False
+        elif MulDivlist[i] == "=":
+            #print("答えは、", result)
+            return result
+        i = i + 1
+
+# 4 - 2 * 5 + 2.5 * 4 - 7 =
 
 
 class CalcFrame(wx.Frame):
@@ -94,8 +150,10 @@ if __name__ == '__main__':
 
     # カスタムフレームを初期化してアプリケーションを開始
     CalText = []
-    Regsterlist = []
-    NumEnzanlist = []
+    Regsterlist = []  # 入力値を配列に登録
+    NumEnzanlist = []  # 数値を演算子を配列を登録
+    MulDivlist = []  # 掛け算と割り算計算して登録
+    PlusMinulist = []  # 足し算引き算を計算して登録
     application = wx.App()
     frame = CalcFrame()
     frame.Show()
