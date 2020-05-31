@@ -2,26 +2,29 @@ import wx
 
 
 def click_btn(event):
-    # CalText[1].SetValue(CalText[0].GetValue())
-    # MulDiv(CalText[0].GetValue())
-    answer = PlusMinus(CalText[0].GetValue())
-    print("答え", answer)
+    siki = KakkoYusen(CalText[0].GetValue())
+    print("式", siki)
+    Clear()
+    answer = PlusMinus(siki)
+    # answer = PlusMinus(CalText[0].GetValue())
     CalText[1].SetValue(str(answer))
-    print("入力値記録", Regsterlist)
-    print("数値演算子記録", NumEnzanlist)
+    print("答え", answer, type(answer))
+    print("入力値", Regsterlist)
+    print("演算", NumEnzanlist)
     print("掛け算割り算", MulDivlist)
+    Clear()
 
 
-def Regster(str):
+def Regster(String):
     i = 0
-    while str[i] != "=":
-        Regsterlist.append(str[i])
+    while String[i] != "=":
+        Regsterlist.append(String[i])
         i = i + 1
     Regsterlist.append("=")
 
 
-def NumRegster(str):
-    Regster(str)
+def NumRegster(String):
+    Regster(String)
     i = 0
     while i < len(Regsterlist):
         if '0' <= Regsterlist[i] <= '9':
@@ -41,8 +44,8 @@ def NumRegster(str):
         i = i + 2
 
 
-def MulDiv(str):
-    NumRegster(str)
+def MulDiv(String):
+    NumRegster(String)
     result = 1.0
     i = 0
     # False:掛け算と割り算が1回以上行われたTrue:掛け算と割り算が1回も行われてない
@@ -68,8 +71,8 @@ def MulDiv(str):
 # 5 - 2 * 3 / 4 + 2 =
 
 
-def PlusMinus(str):
-    MulDiv(str)
+def PlusMinus(String):
+    MulDiv(String)
     i = 0
     result = 0.0
     loop = True
@@ -85,11 +88,51 @@ def PlusMinus(str):
             result = result - MulDivlist[i + 1]
             loop = False
         elif MulDivlist[i] == "=":
-            #print("答えは、", result)
+            # print("答えは、", result)
+            if loop:
+                result = MulDivlist[i - 1]
             return result
         i = i + 1
 
 # 4 - 2 * 5 + 2.5 * 4 - 7 =
+
+
+def Clear():
+    Regsterlist.clear()
+    NumEnzanlist.clear()
+    MulDivlist.clear()
+
+
+def KakkoYusen(String):  # ( 1 + 2 ) * 3 - 2 =
+    i = 0
+    siki = ""
+    # print("GET式", String)
+    while String[i] != "=":
+        print("String", i, String[i])
+        if String[i] == "(":
+            Clear()
+            j = i + 2  # j=2:String[2] = 1
+            value = ""
+            while String[j] != ")":
+                value = value + String[j]
+                j = j + 1
+
+            value = value + "="
+            # print("value", value, PlusMinus(value))
+            siki = siki + str(PlusMinus(value))  # ()計算
+            i = j
+        else:
+            Clear()
+            # print("value", String[i], i)
+            siki = siki + String[i]
+        i = i + 1
+        # print("siki", siki, "i=", i)
+    siki = siki + "="
+    return siki
+
+
+# ( 12 + 56 ) / 34 -9 =
+# 12 + 56 = 58.0
 
 
 class CalcFrame(wx.Frame):
@@ -154,6 +197,7 @@ if __name__ == '__main__':
     NumEnzanlist = []  # 数値を演算子を配列を登録
     MulDivlist = []  # 掛け算と割り算計算して登録
     PlusMinulist = []  # 足し算引き算を計算して登録
+    Sikilist = []  # かっこの中のリスト
     application = wx.App()
     frame = CalcFrame()
     frame.Show()
